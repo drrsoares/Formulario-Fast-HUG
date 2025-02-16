@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FAST HUG">
+    <title>FAST HUG - UTI</title>
+    
+    <!-- Ícones para iOS -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    <style>
+        /* Reset e configurações básicas */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f2f2f7;
+            color: #000;
+        }
+
+        /* Cabeçalho */
+        .header {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin: 0 0 16px 0;
+            font-size: 22px;
+            color: #1c1c1e;
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #1c1c1e;
+            margin: 0 0 12px 0;
+        }
+
+        /* Seções do formulário */
+        .form-section {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Campos de entrada */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1c1c1e;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #c7c7cc;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 8px;
+            background-color: #ffffff;
+            -webkit-appearance: none;
+        }
+
+        /* Estilo específico para select no iOS */
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+            padding-right: 30px;
+        }
+
+        /* Checkboxes estilizados */
+        .checkbox-group {
+            margin: 8px 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #f2f2f7;
+            border-radius: 8px;
+            margin: 4px 0;
+            font-weight: normal;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Botão de envio */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 16px;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .submit-btn:active {
+            background-color: #0051a8;
+        }
+
+        /* Responsividade para iPad */
+        @media (min-width: 768px) {
+            body {
+                max-width: 700px;
+                margin: 0 auto;
+                padding: 24px;
+            }
+
+            .submit-btn {
+                max-width: 300px;
+                margin: 24px auto;
+                display: block;
+            }
+        }
+
+        /* Suporte para modo escuro */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #000;
+                color: #fff;
+            }
+
+            .header,
+            .form-section {
+                background-color: #1c1c1e;
+            }
+
+            h2, h3, label {
+                color: #fff;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            select,
+            textarea {
+                background-color: #2c2c2e;
+                border-color: #3a3a3c;
+                color: #fff;
+            }
+
+            .checkbox-group label {
+                background-color: #2c2c2e;
+            }
+
+            select {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            }
+        }
+    </style>
+</head>
+<body>
+    <form id="fastHugForm">
+        <div class="header">
+            <h2>FAST HUG - Visita UTI</h2>
+            <div class="form-group">
+                <input type="date" name="data" required placeholder="Data">
+                <input type="text" name="paciente" required placeholder="Nome do Paciente">
+                <input type="text" name="leito" required placeholder="Número do Leito">
+                <input type="text" name="medico" required placeholder="Médico Responsável">
+            </div>
+        </div>
+
+        <!-- F - Feeding -->
+        <div class="form-section">
+            <h3>F - Feeding (Alimentação)</h3>
+            <div class="form-group">
+                <select name="via-alimentacao" required>
+                    <option value="">Via de alimentação</option>
+                    <option>Oral</option>
+                    <option>Enteral</option>
+                    <option>Parenteral</option>
+                    <option>Mista</option>
+                    <option>Jejum</option>
+                </select>
+                <input type="number" name="meta-calorica" placeholder="Meta calórica (kcal/dia)">
+                <input type="number" name="meta-proteica" placeholder="Meta proteica (g/dia)">
+            </div>
+        </div>
+
+        <!-- A - Analgesia -->
+        <div class="form-section">
+            <h3>A - Analgesia</h3>
+            <div class="form-group">
+                <input type="number" name="escala-dor" min="0" max="10" placeholder="Escala de dor (0-10)">
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="analgesico-dipirona">Dipirona</label>
+                    <label><input type="checkbox" name="analgesico-tramadol">Tramadol</label>
+                    <label><input type="checkbox" name="analgesico-morfina">Morfina</label>
+                    <label><input type="checkbox" name="analgesico-fentanil">Fentanil</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue com as outras seções do FAST HUG seguindo o mesmo padrão -->
+
+        <button type="submit" class="submit-btn">Salvar Avaliação</button>
+    </form>
+
+    <script>
+        // Prevenir zoom no duplo-toque
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        });
+
+        // Salvar dados do formulário
+        const form = document.getElementById('fastHugForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Coletar dados do formulário
+            const formData = new FormData(form);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Salvar no localStorage
+            const timestamp = new Date().getTime();
+            localStorage.setItem(`visita_${timestamp}`, JSON.stringify(data));
+            
+            // Notificar usuário
+            alert('Avaliação salva com sucesso!');
+        });
+
+        // Preencher data atual ao carregar
+        window.addEventListener('load', function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.querySelector('input[type="date"]').value = hoje;
+        });
+    </script>
+</body>
+</html>
+Add FAST HUG form
