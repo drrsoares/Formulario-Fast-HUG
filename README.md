@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -238,6 +238,43 @@
                 <input type="number" id="glicemia" name="glicemia" required>
             </div>
 
+<div class="form-group">
+    <label>Evacuação:</label>
+    <div class="checkbox-group">
+        <input type="radio" id="evacuacao_sim" name="evacuacao" value="sim" required>
+        <label for="evacuacao_sim">Sim</label>
+    </div>
+    <div class="checkbox-group">
+        <input type="radio" id="evacuacao_nao" name="evacuacao" value="nao" required>
+        <label for="evacuacao_nao">Não</label>
+    </div>
+</div>
+
+<div class="form-group">
+    <label>Diurese:</label>
+    <div class="checkbox-group">
+        <input type="radio" id="diurese_sim" name="diurese_presente" value="sim" required 
+               onchange="document.getElementById('volume_diurese').style.display = this.checked ? 'block' : 'none'">
+        <label for="diurese_sim">Sim</label>
+    </div>
+    <div class="checkbox-group">
+        <input type="radio" id="diurese_nao" name="diurese_presente" value="nao" required
+               onchange="document.getElementById('volume_diurese').style.display = 'none'">
+        <label for="diurese_nao">Não</label>
+    </div>
+    
+    <div id="volume_diurese" style="display: none; margin-top: 10px;">
+        <label for="volume_diurese_input">Volume da Diurese (mL):</label>
+        <input type="number" 
+               id="volume_diurese_input" 
+               name="volume_diurese" 
+               min="0" 
+               max="10000"
+               class="form-control"
+               placeholder="Informe o volume em mL">
+    </div>
+</div>
+
             <div class="form-group">
                 <label for="observacoes">Observações Adicionais:</label>
                 <textarea id="observacoes" name="observacoes" rows="4"></textarea>
@@ -314,42 +351,48 @@
             setTimeout(() => status.innerHTML = '', 3000);
         }
 
-        function baixarCSV() {
-            const cabecalhos = [
-                'Data da Avaliação',
-                'Paciente',
-                'Leito',
-                'Alimentação',
-                'Dor',
-                'RASS',
-                'Tromboprofilaxia',
-                'Cabeceira',
-                'Profilaxia Úlcera',
-                'Glicemia',
-                'Observações',
-                'Data/Hora Registro'
-            ];
+       function baixarCSV() {
+    const cabecalhos = [
+        'Data da Avaliação',
+        'Paciente',
+        'Leito',
+        'Alimentação',
+        'Dor',
+        'RASS',
+        'Tromboprofilaxia',
+        'Cabeceira',
+        'Profilaxia Úlcera',
+        'Glicemia',
+        'Evacuação',
+        'Diurese',
+        'Volume Diurese (mL)',
+        'Observações',
+        'Data/Hora Registro'
+    ];
 
-            let csvContent = cabecalhos.join(',') + '\n';
+    let csvContent = cabecalhos.join(',') + '\n';
 
-            avaliacoes.forEach(av => {
-                const linha = [
-                    av.data,
-                    `"${av.paciente}"`,
-                    `"${av.leito}"`,
-                    `"${av.alimentacao}"`,
-                    av.dor,
-                    `"${av.rass}"`,
-                    `"${av.tromboprofilaxia}"`,
-                    av.cabeceira,
-                    `"${av.ulcera}"`,
-                    av.glicemia,
-                    `"${av.observacoes || ''}"`,
-                    `"${av.timestamp}"`
-                ];
-                csvContent += linha.join(',') + '\n';
-            });
-
+    avaliacoes.forEach(av => {
+        const linha = [
+            av.data,
+            `"${av.paciente}"`,
+            `"${av.leito}"`,
+            `"${av.alimentacao}"`,
+            av.dor,
+            `"${av.rass}"`,
+            `"${av.tromboprofilaxia}"`,
+            av.cabeceira,
+            `"${av.ulcera}"`,
+            av.glicemia,
+            av.evacuacao,
+            av.diurese_presente,
+            av.volume_diurese || 'N/A',
+            `"${av.observacoes || ''}"`,
+            `"${av.timestamp}"`
+        ];
+        csvContent += linha.join(',') + '\n';
+    });
+   
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const dataAtual = new Date().toISOString().split('T')[0];
@@ -403,23 +446,26 @@
         }
 
         function verDetalhes(index) {
-            const av = avaliacoes[index];
-            alert(`
-                Detalhes da Avaliação:
-                
-                Paciente: ${av.paciente}
-                Data: ${av.data}
-                Leito: ${av.leito}
-                Alimentação: ${av.alimentacao}
-                Dor: ${av.dor}
-                RASS: ${av.rass}
-                Tromboprofilaxia: ${av.tromboprofilaxia}
-                Cabeceira: ${av.cabeceira}º
-                Profilaxia Úlcera: ${av.ulcera}
-                Glicemia: ${av.glicemia}
-                Observações: ${av.observacoes || 'Nenhuma'}
-            `);
-        }
+    const av = avaliacoes[index];
+    alert(`
+        Detalhes da Avaliação:
+        
+        Paciente: ${av.paciente}
+        Data: ${av.data}
+        Leito: ${av.leito}
+        Alimentação: ${av.alimentacao}
+        Dor: ${av.dor}
+        RASS: ${av.rass}
+        Tromboprofilaxia: ${av.tromboprofilaxia}
+        Cabeceira: ${av.cabeceira}º
+        Profilaxia Úlcera: ${av.ulcera}
+        Glicemia: ${av.glicemia}
+        Evacuação: ${av.evacuacao}
+        Diurese: ${av.diurese_presente}
+        Volume Diurese: ${av.volume_diurese ? av.volume_diurese + ' mL' : 'N/A'}
+        Observações: ${av.observacoes || 'Nenhuma'}
+    `);
+}
 
         function excluirAvaliacao(index) {
             if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
