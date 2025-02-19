@@ -173,8 +173,59 @@
                     <option value="gastrostomia">Gastrostomia</option>
                     <option value="jejunostomia">Jejunostomia</option>
                     <option value="npo">NPO</option>
+                    <option value="jejum">Jejum</option>
                 </select>
             </div>
+
+<div id="jejum_fields" style="display: none;">
+    <div class="form-group">
+        <label for="data_ultima_alimentacao">Data da Última Alimentação:</label>
+        <input type="datetime-local" 
+               id="data_ultima_alimentacao" 
+               name="data_ultima_alimentacao"
+               onchange="calcularTempoJejum()">
+        <div id="tempo_jejum" class="mt-2 text-sm text-gray-600"></div>
+    </div>
+</div>
+
+function toggleJejumFields() {
+    const alimentacao = document.getElementById('alimentacao').value;
+    const jejumFields = document.getElementById('jejum_fields');
+    
+    if (alimentacao === 'jejum') {
+        jejumFields.style.display = 'block';
+        document.getElementById('data_ultima_alimentacao').required = true;
+    } else {
+        jejumFields.style.display = 'none';
+        document.getElementById('data_ultima_alimentacao').required = false;
+        document.getElementById('data_ultima_alimentacao').value = '';
+        document.getElementById('tempo_jejum').innerHTML = '';
+    }
+}
+
+function calcularTempoJejum() {
+    const dataUltimaAlimentacao = document.getElementById('data_ultima_alimentacao').value;
+    const divTempo = document.getElementById('tempo_jejum');
+    
+    if (dataUltimaAlimentacao) {
+        const dataInicio = new Date(dataUltimaAlimentacao);
+        const dataAtual = new Date();
+        
+        if (dataInicio > dataAtual) {
+            divTempo.innerHTML = '<span style="color: red;">Data da última alimentação não pode ser futura</span>';
+            document.getElementById('data_ultima_alimentacao').value = '';
+            return;
+        }
+
+        const diffTempo = dataAtual - dataInicio;
+        const horas = Math.floor(diffTempo / (1000 * 60 * 60));
+        const minutos = Math.floor((diffTempo % (1000 * 60 * 60)) / (1000 * 60));
+        
+        divTempo.innerHTML = `<strong>Tempo de Jejum:</strong> ${horas} horas e ${minutos} minutos`;
+    } else {
+        divTempo.innerHTML = '';
+    }
+}
 
             <div class="form-group">
                 <label for="dor">A - Analgesia (Escala de Dor 0-10):</label>
@@ -349,30 +400,39 @@
         }
 
         function salvarFormulario(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const dados = Object.fromEntries(formData.entries());
-            
-            // Calcular e adicionar tempo de intubação
-            if (dados.data_intubacao) {
-                const dataInicio = new Date(dados.data_intubacao);
-                const dataAtual = new Date();
-                dataInicio.setHours(12, 0, 0, 0);
-                dataAtual.setHours(12, 0, 0, 0);
-                const diffTempo = dataAtual - dataInicio;
-                dados.tempo_intubacao = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
-            }
-            
-            dados.timestamp = new Date().toISOString();
-            dados.tromboprofilaxia = formData.getAll('tromboprofilaxia').join(';');
-            dados.ulcera = formData.getAll('ulcera').join(';');
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const dados = Object.fromEntries(formData.entries());
+    
+    // Calcular e adicionar tempo de intubação
+    if (dados.data_intubacao) {
+        const dataInicio = new Date(dados.data_intubacao);
+        const dataAtual = new Date();
+        dataInicio.setHours(12, 0, 0, 0);
+        dataAtual.setHours(12, 0, 0, 0);
+        const diffTempo = dataAtual - dataInicio;
+        dados.tempo_intubacao = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+    }
+    
+    // Calcular e adicionar tempo de jejum
+    if (dados.alimentacao === 'jejum' && dados.data_ultima_alimentacao) {
+        const dataInicio = new Date(dados.data_ultima_alimentacao);
+        const dataAtual = new Date();
+        const diffTempo = dataAtual - dataInicio;
+        dados.tempo_jejum_horas = Math.floor(diffTempo / (1000 * 60 * 60));
+        dados.tempo_jejum_minutos = Math.floor((diffTempo % (1000 * 60 * 60)) / (1000 * 60));
+    }
+    
+    dados.timestamp = new Date().toISOString();
+    dados.tromboprofilaxia = formData.getAll('tromboprofilaxia').join(';');
+    dados.ulcera = formData.getAll('ulcera').join(';');
 
-            avaliacoes.push(dados);
-            localStorage.setItem('avaliacoesFastHug', JSON.stringify(avaliacoes));
-            atualizarTabela();
-            mostrarMensagem('Avaliação salva com sucesso!', 'sucesso');
-            event.target.reset();
-        }
+    avaliacoes.push(dados);
+    localStorage.setItem('avaliacoesFastHug', JSON.stringify(avaliacoes));
+    atualizarTabela();
+    mostrarMensagem('Avaliação salva com sucesso!', 'sucesso');
+    event.target.reset();
+}
 
         function mostrarMensagem(texto, tipo) {
             const status = document.getElementById('status');
@@ -381,51 +441,56 @@
         }
 
         function baixarCSV() {
-            const cabecalhos = [
-                'Data da Avaliação',
-                'Paciente',
-                'Leito',
-                'Data da Intubação',
-                'Tempo de Intubação (dias)',
-                'Alimentação',
-                'Dor',
-                'RASS',
-                'Tromboprofilaxia',
-                'Cabeceira',
-                'Profilaxia Úlcera',
-                'Glicemia',
-                'Evacuação',
-                'Diurese',
-                'Volume Diurese (mL)',
-                'Observações',
-                'Data/Hora Registro'
-            ];
+    const cabecalhos = [
+        'Data da Avaliação',
+        'Paciente',
+        'Leito',
+        'Data da Intubação',
+        'Tempo de Intubação (dias)',
+        'Alimentação',
+        'Data Última Alimentação',
+        'Tempo de Jejum (horas)',
+        'Dor',
+        'RASS',
+        'Tromboprofilaxia',
+        'Cabeceira',
+        'Profilaxia Úlcera',
+        'Glicemia',
+        'Evacuação',
+        'Diurese',
+        'Volume Diurese (mL)',
+        'Observações',
+        'Data/Hora Registro'
+    ];
 
-            let csvContent = cabecalhos.join(',') + '\n';
+    let csvContent = cabecalhos.join(',') + '\n';
 
-            avaliacoes.forEach(av => {
-                const linha = [
-                    av.data,
-                    `"${av.paciente}"`,
-                    `"${av.leito}"`,
-                    av.data_intubacao || 'N/A',
-                    av.tempo_intubacao || 'N/A',
-                    `"${av.alimentacao}"`,
-                    av.dor,
-                    `"${av.rass}"`,
-                    `"${av.tromboprofilaxia}"`,
-                    av.cabeceira,
-                    `"${av.ulcera}"`,
-                    av.glicemia,
-                    av.evacuacao,
-                    av.diurese_presente,
-                    av.volume_diurese || 'N/A',
-                    `"${av.observacoes || ''}"`,
-                    `"${av.timestamp}"`
-                ];
-                csvContent += linha.join(',') + '\n';
-            });
+    avaliacoes.forEach(av => {
+        const linha = [
+            av.data,
+            `"${av.paciente}"`,
+            `"${av.leito}"`,
+            av.data_intubacao || 'N/A',
+            av.tempo_intubacao || 'N/A',
+            `"${av.alimentacao}"`,
+            av.data_ultima_alimentacao || 'N/A',
+            av.tempo_jejum_horas ? `${av.tempo_jejum_horas}:${av.tempo_jejum_minutos}` : 'N/A',
+            av.dor,
+            `"${av.rass}"`,
+            `"${av.tromboprofilaxia}"`,
+            av.cabeceira,
+            `"${av.ulcera}"`,
+            av.glicemia,
+            av.evacuacao,
+            av.diurese_presente,
+            av.volume_diurese || 'N/A',
+            `"${av.observacoes || ''}"`,
+            `"${av.timestamp}"`
+        ];
+        csvContent += linha.join(',') + '\n';
+    });
 
+  }
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const dataAtual = new Date().toISOString().split('T')[0];
@@ -458,28 +523,30 @@
         }
 
         function verDetalhes(index) {
-            const av = avaliacoes[index];
-            alert(`
-                Detalhes da Avaliação:
-                
-                Paciente: ${av.paciente}
-                Data: ${av.data}
-                Leito: ${av.leito}
-                Data da Intubação: ${av.data_intubacao || 'Não informada'}
-                Tempo de Intubação: ${av.tempo_intubacao ? av.tempo_intubacao + ' dias' : 'N/A'}
-                Alimentação: ${av.alimentacao}
-                Dor: ${av.dor}
-                RASS: ${av.rass}
-                Tromboprofilaxia: ${av.tromboprofilaxia}
-                Cabeceira: ${av.cabeceira}º
-                Profilaxia Úlcera: ${av.ulcera}
-                Glicemia: ${av.glicemia}
-                Evacuação: ${av.evacuacao}
-                Diurese: ${av.diurese_presente}
-                Volume Diurese: ${av.volume_diurese ? av.volume_diurese + ' mL' : 'N/A'}
-                Observações: ${av.observacoes || 'Nenhuma'}
-            `);
-        }
+    const av = avaliacoes[index];
+    alert(`
+        Detalhes da Avaliação:
+        
+        Paciente: ${av.paciente}
+        Data: ${av.data}
+        Leito: ${av.leito}
+        Data da Intubação: ${av.data_intubacao || 'Não informada'}
+        Tempo de Intubação: ${av.tempo_intubacao ? av.tempo_intubacao + ' dias' : 'N/A'}
+        Alimentação: ${av.alimentacao}
+        ${av.alimentacao === 'jejum' ? `Data Última Alimentação: ${av.data_ultima_alimentacao}
+        Tempo de Jejum: ${av.tempo_jejum_horas} horas e ${av.tempo_jejum_minutos} minutos` : ''}
+        Dor: ${av.dor}
+        RASS: ${av.rass}
+        Tromboprofilaxia: ${av.tromboprofilaxia}
+        Cabeceira: ${av.cabeceira}º
+        Profilaxia Úlcera: ${av.ulcera}
+        Glicemia: ${av.glicemia}
+        Evacuação: ${av.evacuacao}
+        Diurese: ${av.diurese_presente}
+        Volume Diurese: ${av.volume_diurese ? av.volume_diurese + ' mL' : 'N/A'}
+        Observações: ${av.observacoes || 'Nenhuma'}
+    `);
+}
 
         function excluirAvaliacao(index) {
             if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
