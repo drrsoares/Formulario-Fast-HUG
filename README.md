@@ -144,111 +144,176 @@
                 </div>
             </div>
 
-            <h2>FAST HUG</h2>
+            <div class="form-group">
+                <label>Uso de Antibióticos:</label>
+                <div class="checkbox-group">
+                    <input type="radio" id="antibiotico_sim" name="antibiotico" value="sim" onchange="toggleAntibiotico()">
+                    <label for="antibiotico_sim">Sim</label>
+                    <input type="radio" id="antibiotico_nao" name="antibiotico" value="nao" onchange="toggleAntibiotico()">
+                    <label for="antibiotico_nao">Não</label>
+                </div>
+            </div>
+
+            <div id="antibiotico_info" style="display:none">
+                <div class="form-group">
+                    <label>Data de Início do Antibiótico:</label>
+                    <input type="date" id="data_inicio_antibiotico" onchange="calcularTempoAntibiotico()">
+                    <div id="tempo_antibiotico"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Previsão de Término:</label>
+                    <input type="date" id="data_fim_antibiotico">
+                </div>
+                
+                <div class="form-group">
+                    <label>Tipo de Antibiótico:</label>
+                    <select id="tipo_antibiotico" multiple>
+                        <option value="amoxicilina">Amoxicilina</option>
+                        <option value="azitromicina">Azitromicina</option>
+                        <option value="cefalexina">Cefalexina</option>
+                        <option value="ceftriaxona">Ceftriaxona</option>
+                        <option value="ciprofloxacino">Ciprofloxacino</option>
+                        <option value="clindamicina">Clindamicina</option>
+                        <option value="meropenem">Meropenem</option>
+                        <option value="metronidazol">Metronidazol</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Motivo do Uso:</label>
+                    <textarea id="motivo_antibiotico" rows="2"></textarea>
+                </div>
+            </div>
 
             <div class="form-group">
-                <label>F - Alimentação:</label>
-                <select id="alimentacao" required onchange="toggleJejum()">
+                <label>Sonda Vesical de Demora:</label>
+                <div class="checkbox-group">
+                    <input type="radio" id="svd_sim" name="svd" value="sim" onchange="toggleSVD()">
+                    <label for="svd_sim">Sim</label>
+                    <input type="radio" id="svd_nao" name="svd" value="nao" onchange="toggleSVD()">
+                    <label for="svd_nao">Não</label>
+                </div>
+            </div>
+
+            <div id="svd_info" style="display:none">
+                <div class="form-group">
+                    <label>Data de Inserção da SVD:</label>
+                    <input type="date" id="data_svd" onchange="calcularTempoSVD()">
+                    <div id="tempo_svd"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Indicação para Manutenção:</label>
+                    <select id="indicacao_svd">
+                        <option value="">Selecione...</option>
+                        <option value="controle_diurese">Controle Rigoroso de Diurese</option>
+                        <option value="retencao">Retenção Urinária</option>
+                        <option value="bexigaNeurogenica">Bexiga Neurogênica</option>
+                        <option value="cirurgia">Pós-operatório</option>
+                        <option value="lesao">Lesão/Úlcera Sacral</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pode ser removida?</label>
+                    <div class="checkbox-group">
+                        <input type="radio" id="remover_svd_sim" name="remover_svd" value="sim">
+                        <label for="remover_svd_sim">Sim</label>
+                        <input type="radio" id="remover_svd_nao" name="remover_svd" value="nao">
+                        <label for="remover_svd_nao">Não</label>
+                    </div>
+                </div>
+            </div>
+
+            <h2>FAST HUG</h2>
+<div class="form-group">
+                <label>F - Feeding (Alimentação):</label>
+                <select id="feeding" required>
                     <option value="">Selecione...</option>
-                    <option value="jejum">Jejum</option>
-                    <option value="via_oral">Via Oral</option>
-                    <option value="sng">Sonda Nasogástrica</option>
-                    <option value="sne">Sonda Nasoenteral</option>
+                    <option value="oral">Via Oral</option>
+                    <option value="sng">SNG</option>
+                    <option value="sne">SNE</option>
                     <option value="gastrostomia">Gastrostomia</option>
                     <option value="jejunostomia">Jejunostomia</option>
                     <option value="npo">NPO</option>
                 </select>
             </div>
 
-            <div id="jejum_info" style="display:none">
-                <div class="form-group">
-                    <label>Última Alimentação:</label>
-                    <input type="datetime-local" id="ultima_alimentacao">
-                    <div id="tempo_jejum"></div>
+            <div class="form-group">
+                <label>A - Analgesia:</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="analgesia_adequada">
+                    <label for="analgesia_adequada">Analgesia Adequada</label>
                 </div>
+                <textarea id="analgesia_obs" placeholder="Observações sobre analgesia"></textarea>
             </div>
 
             <div class="form-group">
-                <label>A - Analgesia (0-10):</label>
-                <input type="number" id="dor" min="0" max="10" required>
-            </div>
-
-            <div class="form-group">
-                <label>S - Sedação (RASS):</label>
-                <select id="rass" required>
-                    <option value="">Selecione...</option>
+                <label>S - Sedação:</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sedacao_adequada">
+                    <label for="sedacao_adequada">Sedação Adequada</label>
+                </div>
+                <select id="rass">
+                    <option value="">Selecione RASS...</option>
                     <option value="+4">+4 Combativo</option>
                     <option value="+3">+3 Muito Agitado</option>
                     <option value="+2">+2 Agitado</option>
                     <option value="+1">+1 Inquieto</option>
-                    <option value="0">0 Alerta/Calmo</option>
+                    <option value="0">0 Alerta e Calmo</option>
                     <option value="-1">-1 Sonolento</option>
                     <option value="-2">-2 Sedação Leve</option>
                     <option value="-3">-3 Sedação Moderada</option>
                     <option value="-4">-4 Sedação Profunda</option>
-                    <option value="-5">-5 Não Despertável</option>
+                    <option value="-5">-5 Não Desperta</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>T - Tromboprofilaxia:</label>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="heparina">
-                    <label for="heparina">Heparina</label>
+                    <input type="checkbox" id="tromboprofilaxia">
+                    <label for="tromboprofilaxia">Profilaxia Adequada</label>
                 </div>
+                <textarea id="tromboprofilaxia_obs" placeholder="Observações sobre tromboprofilaxia"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>H - Head Elevation (Cabeceira Elevada):</label>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="hbpm">
-                    <label for="hbpm">HBPM</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="anticoagulante">
-                    <label for="anticoagulante">Anticoagulante Oral</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="meias">
-                    <label for="meias">Meias Compressivas</label>
+                    <input type="checkbox" id="cabeceira">
+                    <label for="cabeceira">Cabeceira 30-45°</label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>H - Cabeceira (graus):</label>
-                <input type="number" id="cabeceira" min="0" max="90" required>
-            </div>
-
-            <div class="form-group">
-                <label>U - Profilaxia Úlcera:</label>
+                <label>U - Úlcera por Pressão:</label>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="omeprazol">
-                    <label for="omeprazol">Omeprazol</label>
-                    <input type="checkbox" id="ranitidina">
-                    <label for="ranitidina">Ranitidina</label>
+                    <input type="checkbox" id="upp_prevencao">
+                    <label for="upp_prevencao">Medidas de Prevenção</label>
                 </div>
+                <textarea id="upp_obs" placeholder="Localização e estágio das UPPs, se presentes"></textarea>
             </div>
 
             <div class="form-group">
-                <label>G - Glicemia (mg/dL):</label>
-                <input type="number" id="glicemia" required>
+                <label>G - Glicemia:</label>
+                <input type="number" id="glicemia" placeholder="Valor da glicemia">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="glicemia_controlada">
+                    <label for="glicemia_controlada">Controle Adequado</label>
+                </div>
             </div>
 
             <button type="submit" class="botao">Salvar Avaliação</button>
+            <button type="button" class="botao" onclick="exportarCSV()">Exportar CSV</button>
         </form>
     </div>
 
-    <div id="avaliacoes" class="card">
-        <h2>Avaliações Realizadas</h2>
-        <table class="tabela-avaliacoes">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Paciente</th>
-                    <th>Leito</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-body"></tbody>
-        </table>
-        <button onclick="exportarCSV()" class="botao" style="margin-top: 10px">Exportar CSV</button>
-    </div>
+    <div id="status"></div>
+    <div id="avaliacoes"></div>
 
     <script>
         let avaliacoes = [];
@@ -263,33 +328,49 @@
             div.style.display = document.getElementById('cateter_sim').checked ? 'block' : 'none';
         }
 
-        function toggleJejum() {
-            const div = document.getElementById('jejum_info');
-            div.style.display = document.getElementById('alimentacao').value === 'jejum' ? 'block' : 'none';
+        function toggleAntibiotico() {
+            const div = document.getElementById('antibiotico_info');
+            div.style.display = document.getElementById('antibiotico_sim').checked ? 'block' : 'none';
         }
 
-        function calcularTempo(dataInicio, elemento) {
+        function toggleSVD() {
+            const div = document.getElementById('svd_info');
+            div.style.display = document.getElementById('svd_sim').checked ? 'block' : 'none';
+        }
+
+        function calcularTempo(dataInicio, elementoDestino) {
             if (!dataInicio) return;
+            
             const inicio = new Date(dataInicio);
-            const agora = new Date();
-            const diff = Math.floor((agora - inicio) / (1000 * 60 * 60 * 24));
-            elemento.textContent = `Tempo: ${diff} dia(s)`;
+            const hoje = new Date();
+            const diff = Math.floor((hoje - inicio) / (1000 * 60 * 60 * 24));
+            
+            elementoDestino.textContent = `Tempo: ${diff} dias`;
         }
 
-        document.getElementById('data_intubacao').addEventListener('change', function() {
-            calcularTempo(this.value, document.getElementById('tempo_intubacao'));
-        });
+        function calcularTempoIntubacao() {
+            const dataInicio = document.getElementById('data_intubacao').value;
+            calcularTempo(dataInicio, document.getElementById('tempo_intubacao'));
+        }
 
-        document.getElementById('data_cateter').addEventListener('change', function() {
-            calcularTempo(this.value, document.getElementById('tempo_cateter'));
-        });
+        function calcularTempoCateter() {
+            const dataInicio = document.getElementById('data_cateter').value;
+            calcularTempo(dataInicio, document.getElementById('tempo_cateter'));
+        }
 
-        document.getElementById('ultima_alimentacao').addEventListener('change', function() {
-            calcularTempo(this.value, document.getElementById('tempo_jejum'));
-        });
+        function calcularTempoAntibiotico() {
+            const dataInicio = document.getElementById('data_inicio_antibiotico').value;
+            calcularTempo(dataInicio, document.getElementById('tempo_antibiotico'));
+        }
+
+        function calcularTempoSVD() {
+            const dataInicio = document.getElementById('data_svd').value;
+            calcularTempo(dataInicio, document.getElementById('tempo_svd'));
+        }
 
         document.getElementById('fastHugForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
             const avaliacao = {
                 data: document.getElementById('data').value,
                 paciente: document.getElementById('paciente').value,
@@ -299,99 +380,95 @@
                 cateter: document.getElementById('cateter_sim').checked,
                 data_cateter: document.getElementById('data_cateter').value,
                 retirar_cateter: document.querySelector('input[name="retirar_cateter"]:checked')?.value,
-                alimentacao: document.getElementById('alimentacao').value,
-                ultima_alimentacao: document.getElementById('ultima_alimentacao').value,
-                dor: document.getElementById('dor').value,
+                
+                antibiotico: document.getElementById('antibiotico_sim').checked,
+                data_inicio_antibiotico: document.getElementById('data_inicio_antibiotico').value,
+                data_fim_antibiotico: document.getElementById('data_fim_antibiotico').value,
+                tipo_antibiotico: Array.from(document.getElementById('tipo_antibiotico').selectedOptions).map(opt => opt.value),
+                motivo_antibiotico: document.getElementById('motivo_antibiotico').value,
+                
+                svd: document.getElementById('svd_sim').checked,
+                data_svd: document.getElementById('data_svd').value,
+                indicacao_svd: document.getElementById('indicacao_svd').value,
+                remover_svd: document.querySelector('input[name="remover_svd"]:checked')?.value,
+                
+                feeding: document.getElementById('feeding').value,
+                analgesia_adequada: document.getElementById('analgesia_adequada').checked,
+                analgesia_obs: document.getElementById('analgesia_obs').value,
+                sedacao_adequada: document.getElementById('sedacao_adequada').checked,
                 rass: document.getElementById('rass').value,
-                tromboprofilaxia: {
-                    heparina: document.getElementById('heparina').checked,
-                    hbpm: document.getElementById('hbpm').checked,
-                    anticoagulante: document.getElementById('anticoagulante').checked,
-                    meias: document.getElementById('meias').checked
-                },
-                cabeceira: document.getElementById('cabeceira').value,
-                ulcera: {
-                    omeprazol: document.getElementById('omeprazol').checked,
-                    ranitidina: document.getElementById('ranitidina').checked
-                },
-                glicemia: document.getElementById('glicemia').value
+                tromboprofilaxia: document.getElementById('tromboprofilaxia').checked,
+                tromboprofilaxia_obs: document.getElementById('tromboprofilaxia_obs').value,
+                cabeceira: document.getElementById('cabeceira').checked,
+                upp_prevencao: document.getElementById('upp_prevencao').checked,
+                upp_obs: document.getElementById('upp_obs').value,
+                glicemia: document.getElementById('glicemia').value,
+                glicemia_controlada: document.getElementById('glicemia_controlada').checked
             };
-
+            
             avaliacoes.push(avaliacao);
             atualizarTabela();
+            mostrarStatus('Avaliação salva com sucesso!', 'sucesso');
             this.reset();
-
-            const status = document.createElement('div');
-            status.className = 'status sucesso';
-            status.textContent = 'Avaliação salva com sucesso!';
-            this.appendChild(status);
-            setTimeout(() => status.remove(), 3000);
         });
 
+        function mostrarStatus(mensagem, tipo) {
+            const status = document.getElementById('status');
+            status.textContent = mensagem;
+            status.className = `status ${tipo}`;
+            setTimeout(() => status.textContent = '', 3000);
+        }
+
         function atualizarTabela() {
-            const tbody = document.getElementById('tabela-body');
-            tbody.innerHTML = '';
+            const div = document.getElementById('avaliacoes');
+            if (avaliacoes.length === 0) {
+                div.innerHTML = '';
+                return;
+            }
+
+            let html = '<table class="tabela-avaliacoes">';
+            html += '<tr><th>Data</th><th>Paciente</th><th>Leito</th><th>Ações</th></tr>';
             
             avaliacoes.forEach((av, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${av.data}</td>
-                    <td>${av.paciente}</td>
-                    <td>${av.leito}</td>
-                    <td>
-                        <button onclick="verAvaliacao(${index})" class="botao">Ver</button>
-                        <button onclick="excluirAvaliacao(${index})" class="botao">Excluir</button>
-                    </td>
+                html += `
+                    <tr>
+                        <td>${av.data}</td>
+                        <td>${av.paciente}</td>
+                        <td>${av.leito}</td>
+                        <td>
+                            <button onclick="removerAvaliacao(${index})" class="botao">Remover</button>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
+            
+            html += '</table>';
+            div.innerHTML = html;
         }
 
-        function verAvaliacao(index) {
-            const av = avaliacoes[index];
-            alert(JSON.stringify(av, null, 2));
-        }
-
-        function excluirAvaliacao(index) {
-            if (confirm('Confirma exclusão?')) {
-                avaliacoes.splice(index, 1);
-                atualizarTabela();
-            }
+        function removerAvaliacao(index) {
+            avaliacoes.splice(index, 1);
+            atualizarTabela();
+            mostrarStatus('Avaliação removida com sucesso!', 'sucesso');
         }
 
         function exportarCSV() {
+            if (avaliacoes.length === 0) {
+                mostrarStatus('Não há avaliações para exportar', 'erro');
+                return;
+            }
+
             const csv = [
-                ['Data', 'Paciente', 'Leito', 'Intubado', 'Data Intubação', 'Cateter', 
-                 'Data Cateter', 'Retirar Cateter', 'Alimentação', 'Última Alimentação',
-                 'Dor', 'RASS', 'Cabeceira', 'Glicemia'].join(',')
+                'Data,Paciente,Leito,Intubado,Data Intubação,' +
+                'Cateter,Data Cateter,Retirar Cateter,' +
+                'Antibiótico,Data Início ATB,Data Fim ATB,Tipo ATB,Motivo ATB,' +
+                'SVD,Data SVD,Indicação SVD,Remover SVD,' +
+                'Feeding,Analgesia,Obs Analgesia,Sedação,RASS,' +
+                'Tromboprofilaxia,Obs Tromboprofilaxia,Cabeceira,' +
+                'UPP Prevenção,UPP Obs,Glicemia,Glicemia Controlada'
             ];
 
             avaliacoes.forEach(av => {
-                csv.push([
-                    av.data,
-                    av.paciente,
-                    av.leito,
-                    av.intubado,
-                    av.data_intubacao,
-                    av.cateter,
-                    av.data_cateter,
-                    av.retirar_cateter,
-                    av.alimentacao,
-                    av.ultima_alimentacao,
-                    av.dor,
-                    av.rass,
-                    av.cabeceira,
-                    av.glicemia
-                ].join(','));
-            });
-
-            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'avaliacoes.csv';
-            a.click();
-        }
-    </script>
-</body>
-</html>
+                csv.push(`${av.data},${av.paciente},${av.leito},${av.intubado},${av.data_intubacao},` +
+                    `${av.cateter},${av.data_cateter},${av.retirar_cateter},` +
+                    `${av.antibiotico},${av.data_inicio_antibiotico},${av.data_fim_antibiotico},${av.tipo_
