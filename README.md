@@ -266,7 +266,8 @@
                     <option value="-5">-5 Não Despertável</option>
                 </select>
             </div>
-<div class="form-group">
+
+            <div class="form-group">
                 <label>T - Tromboprofilaxia:</label>
                 <div class="checkbox-group">
                     <input type="checkbox" id="heparina" name="tromboprofilaxia" value="heparina">
@@ -346,6 +347,105 @@
                            max="10000"
                            class="form-control"
                            placeholder="Informe o volume em mL">
+                </div>
+            </div>
+
+<!-- Campos para Cateter -->
+            <div class="form-group">
+                <label>Uso de Cateter:</label>
+                <div class="checkbox-group">
+                    <input type="radio" id="cateter_sim" name="uso_cateter" value="sim" required 
+                           onchange="toggleCateterFields()">
+                    <label for="cateter_sim">Sim</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="radio" id="cateter_nao" name="uso_cateter" value="nao" required
+                           onchange="toggleCateterFields()">
+                    <label for="cateter_nao">Não</label>
+                </div>
+            </div>
+
+            <div id="cateter_fields" style="display: none;">
+                <div class="form-group">
+                    <label for="data_insercao_cateter">Data de Inserção do Cateter:</label>
+                    <input type="date" id="data_insercao_cateter" name="data_insercao_cateter" 
+                           onchange="calcularTempoCateter()">
+                    <div id="tempo_cateter" class="mt-2 text-sm text-gray-600"></div>
+                </div>
+                <div class="form-group">
+                    <label>Pode ser retirado?</label>
+                    <div class="checkbox-group">
+                        <input type="radio" id="retirar_cateter_sim" name="pode_retirar_cateter" value="sim">
+                        <label for="retirar_cateter_sim">Sim</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="radio" id="retirar_cateter_nao" name="pode_retirar_cateter" value="nao">
+                        <label for="retirar_cateter_nao">Não</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos para Sonda Vesical -->
+            <div class="form-group">
+                <label>Uso de Sonda Vesical de Demora:</label>
+                <div class="checkbox-group">
+                    <input type="radio" id="svd_sim" name="uso_svd" value="sim" required 
+                           onchange="toggleSVDFields()">
+                    <label for="svd_sim">Sim</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="radio" id="svd_nao" name="uso_svd" value="nao" required
+                           onchange="toggleSVDFields()">
+                    <label for="svd_nao">Não</label>
+                </div>
+            </div>
+
+            <div id="svd_fields" style="display: none;">
+                <div class="form-group">
+                    <label for="data_instalacao_svd">Data de Instalação da SVD:</label>
+                    <input type="date" id="data_instalacao_svd" name="data_instalacao_svd" 
+                           onchange="calcularTempoSVD()">
+                    <div id="tempo_svd" class="mt-2 text-sm text-gray-600"></div>
+                </div>
+                <div class="form-group">
+                    <label>Pode ser retirada?</label>
+                    <div class="checkbox-group">
+                        <input type="radio" id="retirar_svd_sim" name="pode_retirar_svd" value="sim">
+                        <label for="retirar_svd_sim">Sim</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="radio" id="retirar_svd_nao" name="pode_retirar_svd" value="nao">
+                        <label for="retirar_svd_nao">Não</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos para Antibiótico -->
+            <div class="form-group">
+                <label>Uso de Antibiótico:</label>
+                <div class="checkbox-group">
+                    <input type="radio" id="antibiotico_sim" name="uso_antibiotico" value="sim" required 
+                           onchange="toggleAntibioticoFields()">
+                    <label for="antibiotico_sim">Sim</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="radio" id="antibiotico_nao" name="uso_antibiotico" value="nao" required
+                           onchange="toggleAntibioticoFields()">
+                    <label for="antibiotico_nao">Não</label>
+                </div>
+            </div>
+
+            <div id="antibiotico_fields" style="display: none;">
+                <div class="form-group">
+                    <label>Pode ser suspenso?</label>
+                    <div class="checkbox-group">
+                        <input type="radio" id="suspender_antibiotico_sim" name="pode_suspender_antibiotico" value="sim">
+                        <label for="suspender_antibiotico_sim">Sim</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="radio" id="suspender_antibiotico_nao" name="pode_suspender_antibiotico" value="nao">
+                        <label for="suspender_antibiotico_nao">Não</label>
+                    </div>
                 </div>
             </div>
 
@@ -467,6 +567,52 @@
             }
         }
 
+        function toggleCateterFields() {
+            const usaCateter = document.getElementById('cateter_sim').checked;
+            const cateterFields = document.getElementById('cateter_fields');
+            const dataInsercao = document.getElementById('data_insercao_cateter');
+            
+            if (usaCateter) {
+                cateterFields.style.display = 'block';
+                dataInsercao.required = true;
+            } else {
+                cateterFields.style.display = 'none';
+                dataInsercao.required = false;
+                dataInsercao.value = '';
+                document.getElementById('tempo_cateter').innerHTML = '';
+                document.querySelectorAll('input[name="pode_retirar_cateter"]').forEach(radio => radio.checked = false);
+            }
+        }
+
+        function toggleSVDFields() {
+            const usaSVD = document.getElementById('svd_sim').checked;
+            const svdFields = document.getElementById('svd_fields');
+            const dataInstalacao = document.getElementById('data_instalacao_svd');
+            
+            if (usaSVD) {
+                svdFields.style.display = 'block';
+                dataInstalacao.required = true;
+            } else {
+                svdFields.style.display = 'none';
+                dataInstalacao.required = false;
+                dataInstalacao.value = '';
+                document.getElementById('tempo_svd').innerHTML = '';
+                document.querySelectorAll('input[name="pode_retirar_svd"]').forEach(radio => radio.checked = false);
+            }
+        }
+
+        function toggleAntibioticoFields() {
+            const usaAntibiotico = document.getElementById('antibiotico_sim').checked;
+            const antibioticoFields = document.getElementById('antibiotico_fields');
+            
+            if (usaAntibiotico) {
+                antibioticoFields.style.display = 'block';
+            } else {
+                antibioticoFields.style.display = 'none';
+                document.querySelectorAll('input[name="pode_suspender_antibiotico"]').forEach(radio => radio.checked = false);
+            }
+        }
+
         function calcularTempoIntubacao() {
             const dataIntubacaoInput = document.getElementById('data_intubacao');
             const dataAvaliacaoInput = document.getElementById('data');
@@ -525,6 +671,64 @@
             }
         }
 
+        function calcularTempoCateter() {
+            const dataInsercaoInput = document.getElementById('data_insercao_cateter');
+            const dataAvaliacaoInput = document.getElementById('data');
+            const divTempo = document.getElementById('tempo_cateter');
+            
+            try {
+                if (!dataInsercaoInput.value || !dataAvaliacaoInput.value) {
+                    divTempo.innerHTML = '';
+                    return;
+                }
+
+                const dataInsercao = validarData(dataInsercaoInput.value, 'Data de inserção do cateter');
+                const dataAvaliacao = validarData(dataAvaliacaoInput.value, 'Data da avaliação');
+
+                if (dataInsercao > dataAvaliacao) {
+                    throw new Error('Data de inserção do cateter não pode ser posterior à data da avaliação');
+                }
+
+                const dias = DateUtils.getDifferenceInDays(dataInsercao, dataAvaliacao);
+                divTempo.innerHTML = `<strong>Tempo de uso do cateter:</strong> ${dias} dia(s)`;
+                divTempo.className = 'mt-2 text-sm text-green-600';
+                
+            } catch (error) {
+                divTempo.innerHTML = `<span class="error-message">${error.message}</span>`;
+                divTempo.className = 'mt-2 text-sm text-red-600';
+                dataInsercaoInput.value = '';
+            }
+        }
+
+        function calcularTempoSVD() {
+            const dataInstalacaoInput = document.getElementById('data_instalacao_svd');
+            const dataAvaliacaoInput = document.getElementById('data');
+            const divTempo = document.getElementById('tempo_svd');
+            
+            try {
+                if (!dataInstalacaoInput.value || !dataAvaliacaoInput.value) {
+                    divTempo.innerHTML = '';
+                    return;
+                }
+
+                const dataInstalacao = validarData(dataInstalacaoInput.value, 'Data de instalação da SVD');
+                const dataAvaliacao = validarData(dataAvaliacaoInput.value, 'Data da avaliação');
+
+                if (dataInstalacao > dataAvaliacao) {
+                    throw new Error('Data de instalação da SVD não pode ser posterior à data da avaliação');
+                }
+
+                const dias = DateUtils.getDifferenceInDays(dataInstalacao, dataAvaliacao);
+                divTempo.innerHTML = `<strong>Tempo de uso da SVD:</strong> ${dias} dia(s)`;
+                divTempo.className = 'mt-2 text-sm text-green-600';
+                
+            } catch (error) {
+                divTempo.innerHTML = `<span class="error-message">${error.message}</span>`;
+                divTempo.className = 'mt-2 text-sm text-red-600';
+                dataInstalacaoInput.value = '';
+            }
+        }
+
         function validarDataAvaliacao() {
             const dataAvaliacaoInput = document.getElementById('data');
             try {
@@ -535,6 +739,12 @@
                     }
                     if (document.getElementById('alimentacao').value === 'jejum') {
                         calcularTempoJejum();
+                    }
+                    if (document.getElementById('cateter_sim').checked) {
+                        calcularTempoCateter();
+                    }
+                    if (document.getElementById('svd_sim').checked) {
+                        calcularTempoSVD();
                     }
                 }
             } catch (error) {
@@ -577,6 +787,30 @@
                     const tempoJejum = DateUtils.getDifferenceInHoursAndMinutes(dataUltimaAlimentacao, dataAvaliacao);
                     dados.tempo_jejum_horas = tempoJejum.hours;
                     dados.tempo_jejum_minutos = tempoJejum.minutes;
+                }
+
+                // Validar data de inserção do cateter se aplicável
+                if (dados.uso_cateter === 'sim') {
+                    if (!dados.data_insercao_cateter) {
+                        throw new Error('Data de inserção do cateter é obrigatória');
+                    }
+                    const dataInsercao = validarData(dados.data_insercao_cateter, 'Data de inserção do cateter');
+                    if (dataInsercao > dataAvaliacao) {
+                        throw new Error('Data de inserção do cateter não pode ser posterior à data da avaliação');
+                    }
+                    dados.tempo_cateter = DateUtils.getDifferenceInDays(dataInsercao, dataAvaliacao);
+                }
+
+                // Validar data de instalação da SVD se aplicável
+                if (dados.uso_svd === 'sim') {
+                    if (!dados.data_instalacao_svd) {
+                        throw new Error('Data de instalação da SVD é obrigatória');
+                    }
+                    const dataInstalacao = validarData(dados.data_instalacao_svd, 'Data de instalação da SVD');
+                    if (dataInstalacao > dataAvaliacao) {
+                        throw new Error('Data de instalação da SVD não pode ser posterior à data da avaliação');
+                    }
+                    dados.tempo_svd = DateUtils.getDifferenceInDays(dataInstalacao, dataAvaliacao);
                 }
 
                 dados.timestamp = new Date().toISOString();
@@ -657,6 +891,20 @@
                 Evacuação: ${av.evacuacao}
                 Diurese: ${av.diurese_presente}
                 Volume Diurese: ${av.volume_diurese ? av.volume_diurese + ' mL' : 'N/A'}
+                
+                Uso de Cateter: ${av.uso_cateter === 'sim' ? 'Sim' : 'Não'}
+                ${av.uso_cateter === 'sim' ? `Data de Inserção: ${av.data_insercao_cateter}
+                Tempo de Uso: ${av.tempo_cateter} dias
+                Pode ser retirado: ${av.pode_retirar_cateter === 'sim' ? 'Sim' : 'Não'}` : ''}
+                
+                Uso de SVD: ${av.uso_svd === 'sim' ? 'Sim' : 'Não'}
+                ${av.uso_svd === 'sim' ? `Data de Instalação: ${av.data_instalacao_svd}
+                Tempo de Uso: ${av.tempo_svd} dias
+                Pode ser retirada: ${av.pode_retirar_svd === 'sim' ? 'Sim' : 'Não'}` : ''}
+                
+                Uso de Antibiótico: ${av.uso_antibiotico === 'sim' ? 'Sim' : 'Não'}
+                ${av.uso_antibiotico === 'sim' ? `Pode ser suspenso: ${av.pode_suspender_antibiotico === 'sim' ? 'Sim' : 'Não'}` : ''}
+                
                 Observações: ${av.observacoes || 'Nenhuma'}
             `);
         }
@@ -690,6 +938,16 @@
                 'Evacuação',
                 'Diurese',
                 'Volume Diurese (mL)',
+                'Uso de Cateter',
+                'Data Inserção Cateter',
+                'Tempo de Uso Cateter (dias)',
+                'Pode Retirar Cateter',
+                'Uso de SVD',
+                'Data Instalação SVD',
+                'Tempo de Uso SVD (dias)',
+                'Pode Retirar SVD',
+                'Uso de Antibiótico',
+                'Pode Suspender Antibiótico',
                 'Observações',
                 'Data/Hora Registro'
             ];
@@ -716,6 +974,16 @@
                     av.evacuacao,
                     av.diurese_presente,
                     av.volume_diurese || 'N/A',
+                    av.uso_cateter,
+                    av.data_insercao_cateter || 'N/A',
+                    av.tempo_cateter || 'N/A',
+                    av.pode_retirar_cateter || 'N/A',
+                    av.uso_svd,
+                    av.data_instalacao_svd || 'N/A',
+                    av.tempo_svd || 'N/A',
+                    av.pode_retirar_svd || 'N/A',
+                    av.uso_antibiotico,
+                    av.pode_suspender_antibiotico || 'N/A',
                     `"${av.observacoes || ''}"`,
                     `"${av.timestamp}"`
                 ];
@@ -725,18 +993,4 @@
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const dataAtual = new Date().toISOString().split('T')[0];
-            const nomeArquivo = `fasthug_registros_${dataAtual}.csv`;
-
-            if (navigator.msSaveBlob) {
-                navigator.msSaveBlob(blob, nomeArquivo);
-            } else {
-                link.href = URL.createObjectURL(blob);
-                link.setAttribute("download", nomeArquivo);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-    </script>
-</body>
-</html>
+            const nomeArquivo = `fasthug_registros_${dataAt
