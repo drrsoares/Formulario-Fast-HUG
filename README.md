@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAST HUG - UTI 2</title>
+    <title>FAST HUG - Sistema Integrado</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -81,19 +81,49 @@
         }
 
         .status {
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
         }
 
-        .sucesso {
-            background: #C6F6D5;
-            color: #276749;
+        .status.erro {
+            background: #FEE2E2;
+            color: #991B1B;
+            border-left: 4px solid #DC2626;
         }
 
-        .erro {
-            background: #FED7D7;
-            color: #C53030;
+        .status.sucesso {
+            background: #DCFCE7;
+            color: #166534;
+            border-left: 4px solid #16A34A;
+        }
+
+        .mensagem-conteudo {
+            margin-right: 25px;
+        }
+
+        .fechar-mensagem {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+        .fechar-mensagem:hover {
+            opacity: 1;
+        }
+
+        .error-message {
+            color: #DC2626;
+            font-weight: 500;
         }
 
         table {
@@ -133,6 +163,17 @@
                 margin: 5px 0;
             }
         }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -142,7 +183,7 @@
         <form id="fastHugForm" onsubmit="salvarFormulario(event)">
             <div class="form-group">
                 <label for="data">Data da Avaliação:</label>
-                <input type="date" id="data" name="data" required>
+                <input type="date" id="data" name="data" required onchange="validarDataAvaliacao()">
             </div>
 
             <div class="form-group">
@@ -156,9 +197,25 @@
             </div>
 
             <div class="form-group">
-                <label for="data_intubacao">Data da Intubação:</label>
-                <input type="date" id="data_intubacao" name="data_intubacao" onchange="calcularTempoIntubacao()">
-                <div id="tempo_intubacao" class="mt-2 text-sm text-gray-600"></div>
+                <label>Paciente está intubado(a)?</label>
+                <div class="checkbox-group">
+                    <input type="radio" id="intubado_sim" name="esta_intubado" value="sim" required 
+                           onchange="toggleIntubacaoFields()">
+                    <label for="intubado_sim">Sim</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="radio" id="intubado_nao" name="esta_intubado" value="nao" required
+                           onchange="toggleIntubacaoFields()">
+                    <label for="intubado_nao">Não</label>
+                </div>
+            </div>
+
+            <div id="intubacao_fields" style="display: none;">
+                <div class="form-group">
+                    <label for="data_intubacao">Data da Intubação:</label>
+                    <input type="date" id="data_intubacao" name="data_intubacao" onchange="calcularTempoIntubacao()">
+                    <div id="tempo_intubacao" class="mt-2 text-sm text-gray-600"></div>
+                </div>
             </div>
 
             <h2>FAST HUG</h2>
@@ -209,8 +266,7 @@
                     <option value="-5">-5 Não Despertável</option>
                 </select>
             </div>
-
-            <div class="form-group">
+<div class="form-group">
                 <label>T - Tromboprofilaxia:</label>
                 <div class="checkbox-group">
                     <input type="checkbox" id="heparina" name="tromboprofilaxia" value="heparina">
@@ -322,6 +378,35 @@
     </div>
 
     <script>
+        // Objeto utilitário para manipulação de datas
+        const DateUtils = {
+            isValidDate(date) {
+                return date instanceof Date && !isNaN(date);
+            },
+
+            parseDate(dateString) {
+                const parsedDate = new Date(dateString);
+                return this.isValidDate(parsedDate) ? parsedDate : null;
+            },
+
+            formatDate(date) {
+                if (!this.isValidDate(date)) return 'Data inválida';
+                return date.toLocaleDateString('pt-BR');
+            },
+
+            getDifferenceInDays(startDate, endDate) {
+                const diffTime = Math.abs(endDate - startDate);
+                return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            },
+
+            getDifferenceInHoursAndMinutes(startDate, endDate) {
+                const diffTime = Math.abs(endDate - startDate);
+                const hours = Math.floor(diffTime / (1000 * 60 * 60));
+                const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+                return { hours, minutes };
+            }
+        };
+
         // Array para armazenar todas as entradas
         let avaliacoes = [];
         
@@ -334,110 +419,204 @@
             }
         };
 
+        function validarData(data, tipo) {
+            const parsedDate = DateUtils.parseDate(data);
+            if (!parsedDate) {
+                throw new Error(`${tipo}: formato de data inválido`);
+            }
+            
+            const hoje = new Date();
+            hoje.setHours(23, 59, 59, 999);
+
+            if (parsedDate > hoje) {
+                throw new Error(`${tipo} não pode ser uma data futura`);
+            }
+
+            return parsedDate;
+        }
+
+        function toggleIntubacaoFields() {
+            const estaIntubado = document.getElementById('intubado_sim').checked;
+            const intubacaoFields = document.getElementById('intubacao_fields');
+            const dataIntubacao = document.getElementById('data_intubacao');
+            
+            if (estaIntubado) {
+                intubacaoFields.style.display = 'block';
+                dataIntubacao.required = true;
+            } else {
+                intubacaoFields.style.display = 'none';
+                dataIntubacao.required = false;
+                dataIntubacao.value = '';
+                document.getElementById('tempo_intubacao').innerHTML = '';
+            }
+        }
+
         function toggleJejumFields() {
             const alimentacao = document.getElementById('alimentacao').value;
             const jejumFields = document.getElementById('jejum_fields');
+            const dataUltimaAlimentacao = document.getElementById('data_ultima_alimentacao');
             
             if (alimentacao === 'jejum') {
                 jejumFields.style.display = 'block';
-                document.getElementById('data_ultima_alimentacao').required = true;
+                dataUltimaAlimentacao.required = true;
             } else {
                 jejumFields.style.display = 'none';
-                document.getElementById('data_ultima_alimentacao').required = false;
-                document.getElementById('data_ultima_alimentacao').value = '';
+                dataUltimaAlimentacao.required = false;
+                dataUltimaAlimentacao.value = '';
                 document.getElementById('tempo_jejum').innerHTML = '';
             }
         }
 
-        function calcularTempoJejum() {
-            const dataUltimaAlimentacao = document.getElementById('data_ultima_alimentacao').value;
-            const divTempo = document.getElementById('tempo_jejum');
+        function calcularTempoIntubacao() {
+            const dataIntubacaoInput = document.getElementById('data_intubacao');
+            const dataAvaliacaoInput = document.getElementById('data');
+            const divTempo = document.getElementById('tempo_intubacao');
             
-            if (dataUltimaAlimentacao) {
-                const dataInicio = new Date(dataUltimaAlimentacao);
-                const dataAtual = new Date();
-                
-                if (dataInicio > dataAtual) {
-                    divTempo.innerHTML = '<span style="color: red;">Data da última alimentação não pode ser futura</span>';
-                    document.getElementById('data_ultima_alimentacao').value = '';
+            try {
+                if (!dataIntubacaoInput.value || !dataAvaliacaoInput.value) {
+                    divTempo.innerHTML = '';
                     return;
                 }
 
-                const diffTempo = dataAtual - dataInicio;
-                const horas = Math.floor(diffTempo / (1000 * 60 * 60));
-                const minutos = Math.floor((diffTempo % (1000 * 60 * 60)) / (1000 * 60));
+                const dataIntubacao = validarData(dataIntubacaoInput.value, 'Data de intubação');
+                const dataAvaliacao = validarData(dataAvaliacaoInput.value, 'Data da avaliação');
+
+                if (dataIntubacao > dataAvaliacao) {
+                    throw new Error('Data de intubação não pode ser posterior à data da avaliação');
+                }
+
+                const dias = DateUtils.getDifferenceInDays(dataIntubacao, dataAvaliacao);
+                divTempo.innerHTML = `<strong>Tempo de Intubação:</strong> ${dias} dia(s)`;
+                divTempo.className = 'mt-2 text-sm text-green-600';
                 
-                divTempo.innerHTML = `<strong>Tempo de Jejum:</strong> ${horas} horas e ${minutos} minutos`;
-            } else {
-                divTempo.innerHTML = '';
+            } catch (error) {
+                divTempo.innerHTML = `<span class="error-message">${error.message}</span>`;
+                divTempo.className = 'mt-2 text-sm text-red-600';
+                dataIntubacaoInput.value = '';
             }
         }
 
-        function calcularTempoIntubacao() {
-            const dataIntubacao = document.getElementById('data_intubacao').value;
-            const divTempo = document.getElementById('tempo_intubacao');
+        function calcularTempoJejum() {
+            const dataUltimaAlimentacaoInput = document.getElementById('data_ultima_alimentacao');
+            const dataAvaliacaoInput = document.getElementById('data');
+            const divTempo = document.getElementById('tempo_jejum');
             
-            if (dataIntubacao) {
-                const dataInicio = new Date(dataIntubacao);
-                const dataAtual = new Date();
-                
-                // Ajusta as datas para meio-dia para evitar problemas com horário de verão
-                dataInicio.setHours(12, 0, 0, 0);
-                dataAtual.setHours(12, 0, 0, 0);
-                
-                const diffTempo = dataAtual - dataInicio;
-                const dias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
-                
-                if (dias < 0) {
-                    divTempo.innerHTML = '<span style="color: red;">Data de intubação não pode ser futura</span>';
-                    document.getElementById('data_intubacao').value = '';
-                } else {
-                    divTempo.innerHTML = `<strong>Tempo de Intubação:</strong> ${dias} dia(s)`;
+            try {
+                if (!dataUltimaAlimentacaoInput.value || !dataAvaliacaoInput.value) {
+                    divTempo.innerHTML = '';
+                    return;
                 }
-            } else {
-                divTempo.innerHTML = '';
+
+                const dataUltimaAlimentacao = validarData(dataUltimaAlimentacaoInput.value, 'Data da última alimentação');
+                const dataAvaliacao = validarData(dataAvaliacaoInput.value, 'Data da avaliação');
+
+                if (dataUltimaAlimentacao > dataAvaliacao) {
+                    throw new Error('Data da última alimentação não pode ser posterior à data da avaliação');
+                }
+
+                const { hours, minutes } = DateUtils.getDifferenceInHoursAndMinutes(dataUltimaAlimentacao, dataAvaliacao);
+                divTempo.innerHTML = `<strong>Tempo de Jejum:</strong> ${hours} horas e ${minutes} minutos`;
+                divTempo.className = 'mt-2 text-sm text-green-600';
+                
+            } catch (error) {
+                divTempo.innerHTML = `<span class="error-message">${error.message}</span>`;
+                divTempo.className = 'mt-2 text-sm text-red-600';
+                dataUltimaAlimentacaoInput.value = '';
+            }
+        }
+
+        function validarDataAvaliacao() {
+            const dataAvaliacaoInput = document.getElementById('data');
+            try {
+                if (dataAvaliacaoInput.value) {
+                    validarData(dataAvaliacaoInput.value, 'Data da avaliação');
+                    if (document.getElementById('intubado_sim').checked) {
+                        calcularTempoIntubacao();
+                    }
+                    if (document.getElementById('alimentacao').value === 'jejum') {
+                        calcularTempoJejum();
+                    }
+                }
+            } catch (error) {
+                mostrarMensagem(error.message, 'erro');
+                dataAvaliacaoInput.value = '';
             }
         }
 
         function salvarFormulario(event) {
             event.preventDefault();
-            const formData = new FormData(event.target);
-            const dados = Object.fromEntries(formData.entries());
             
-            // Calcular e adicionar tempo de intubação
-            if (dados.data_intubacao) {
-                const dataInicio = new Date(dados.data_intubacao);
-                const dataAtual = new Date();
-                dataInicio.setHours(12, 0, 0, 0);
-                dataAtual.setHours(12, 0, 0, 0);
-                const diffTempo = dataAtual - dataInicio;
-                dados.tempo_intubacao = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
-            }
-            
-            // Calcular e adicionar tempo de jejum
-            if (dados.alimentacao === 'jejum' && dados.data_ultima_alimentacao) {
-                const dataInicio = new Date(dados.data_ultima_alimentacao);
-                const dataAtual = new Date();
-                const diffTempo = dataAtual - dataInicio;
-                dados.tempo_jejum_horas = Math.floor(diffTempo / (1000 * 60 * 60));
-                dados.tempo_jejum_minutos = Math.floor((diffTempo % (1000 * 60 * 60)) / (1000 * 60));
-            }
-            
-            dados.timestamp = new Date().toISOString();
-            dados.tromboprofilaxia = formData.getAll('tromboprofilaxia').join(';');
-            dados.ulcera = formData.getAll('ulcera').join(';');
+            try {
+                const formData = new FormData(event.target);
+                const dados = Object.fromEntries(formData.entries());
 
-            avaliacoes.push(dados);
-            localStorage.setItem('avaliacoesFastHug', JSON.stringify(avaliacoes));
-            atualizarTabela();
-            mostrarMensagem('Avaliação salva com sucesso!', 'sucesso');
-            event.target.reset();
+                // Validar data da avaliação
+                const dataAvaliacao = validarData(dados.data, 'Data da avaliação');
+
+                // Validar data de intubação se aplicável
+                if (dados.esta_intubado === 'sim') {
+                    if (!dados.data_intubacao) {
+                        throw new Error('Data de intubação é obrigatória para pacientes intubados');
+                    }
+                    const dataIntubacao = validarData(dados.data_intubacao, 'Data de intubação');
+                    if (dataIntubacao > dataAvaliacao) {
+                        throw new Error('Data de intubação não pode ser posterior à data da avaliação');
+                    }
+                    dados.tempo_intubacao = DateUtils.getDifferenceInDays(dataIntubacao, dataAvaliacao);
+                }
+
+                // Validar data da última alimentação se em jejum
+                if (dados.alimentacao === 'jejum') {
+                    if (!dados.data_ultima_alimentacao) {
+                        throw new Error('Data da última alimentação é obrigatória para pacientes em jejum');
+                    }
+                    const dataUltimaAlimentacao = validarData(dados.data_ultima_alimentacao, 'Data da última alimentação');
+                    if (dataUltimaAlimentacao > dataAvaliacao) {
+                        throw new Error('Data da última alimentação não pode ser posterior à data da avaliação');
+                    }
+                    const tempoJejum = DateUtils.getDifferenceInHoursAndMinutes(dataUltimaAlimentacao, dataAvaliacao);
+                    dados.tempo_jejum_horas = tempoJejum.hours;
+                    dados.tempo_jejum_minutos = tempoJejum.minutes;
+                }
+
+                dados.timestamp = new Date().toISOString();
+                dados.tromboprofilaxia = formData.getAll('tromboprofilaxia').join(';');
+                dados.ulcera = formData.getAll('ulcera').join(';');
+
+                avaliacoes.push(dados);
+                localStorage.setItem('avaliacoesFastHug', JSON.stringify(avaliacoes));
+                atualizarTabela();
+                mostrarMensagem('Avaliação salva com sucesso!', 'sucesso');
+                event.target.reset();
+                
+            } catch (error) {
+                mostrarMensagem(error.message, 'erro');
+            }
         }
 
         function mostrarMensagem(texto, tipo) {
             const status = document.getElementById('status');
-            status.innerHTML = `<div class="status ${tipo}">${texto}</div>`;
-            setTimeout(() => status.innerHTML = '', 3000);
+            const mensagem = document.createElement('div');
+            mensagem.className = `status ${tipo}`;
+            mensagem.innerHTML = `
+                <div class="mensagem-conteudo">
+                    <strong>${tipo === 'erro' ? 'Erro: ' : 'Sucesso: '}</strong>
+                    ${texto}
+                </div>
+                ${tipo === 'erro' ? '<button class="fechar-mensagem">&times;</button>' : ''}
+            `;
+            
+            if (tipo === 'erro') {
+                mensagem.querySelector('.fechar-mensagem').onclick = () => status.removeChild(mensagem);
+            } else {
+                setTimeout(() => {
+                    if (status.contains(mensagem)) {
+                        status.removeChild(mensagem);
+                    }
+                }, 3000);
+            }
+            
+            status.appendChild(mensagem);
         }
 
         function atualizarTabela() {
@@ -463,8 +642,9 @@
                 Paciente: ${av.paciente}
                 Data: ${av.data}
                 Leito: ${av.leito}
-                Data da Intubação: ${av.data_intubacao || 'Não informada'}
-                Tempo de Intubação: ${av.tempo_intubacao ? av.tempo_intubacao + ' dias' : 'N/A'}
+                Intubado(a): ${av.esta_intubado === 'sim' ? 'Sim' : 'Não'}
+                ${av.esta_intubado === 'sim' ? `Data da Intubação: ${av.data_intubacao || 'Não informada'}
+                Tempo de Intubação: ${av.tempo_intubacao ? av.tempo_intubacao + ' dias' : 'N/A'}` : ''}
                 Alimentação: ${av.alimentacao}
                 ${av.alimentacao === 'jejum' ? `Data Última Alimentação: ${av.data_ultima_alimentacao}
                 Tempo de Jejum: ${av.tempo_jejum_horas} horas e ${av.tempo_jejum_minutos} minutos` : ''}
@@ -495,6 +675,7 @@
                 'Data da Avaliação',
                 'Paciente',
                 'Leito',
+                'Intubado(a)',
                 'Data da Intubação',
                 'Tempo de Intubação (dias)',
                 'Alimentação',
@@ -520,6 +701,7 @@
                     av.data,
                     `"${av.paciente}"`,
                     `"${av.leito}"`,
+                    av.esta_intubado,
                     av.data_intubacao || 'N/A',
                     av.tempo_intubacao || 'N/A',
                     `"${av.alimentacao}"`,
