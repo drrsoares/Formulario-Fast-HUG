@@ -308,3 +308,194 @@
             <tbody></tbody>
         </table>
     </div>
+
+<script>
+        // Array para armazenar todas as entradas
+        let avaliacoes = [];
+        
+        // Carregar dados existentes ao iniciar
+        window.onload = function() {
+            const dadosSalvos = localStorage.getItem('avaliacoesFastHug');
+            if (dadosSalvos) {
+                avaliacoes = JSON.parse(dadosSalvos);
+                atualizarTabela();
+            }
+        };
+
+        function calcularTempoIntubacao() {
+            const dataIntubacao = document.getElementById('data_intubacao').value;
+            const divTempo = document.getElementById('tempo_intubacao');
+            
+            if (dataIntubacao) {
+                const dataInicio = new Date(dataIntubacao);
+                const dataAtual = new Date();
+                
+                // Ajusta as datas para meio-dia para evitar problemas com horário de verão
+                dataInicio.setHours(12, 0, 0, 0);
+                dataAtual.setHours(12, 0, 0, 0);
+                
+                const diffTempo = dataAtual - dataInicio;
+                const dias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+                
+                if (dias < 0) {
+                    divTempo.innerHTML = '<span style="color: red;">Data de intubação não pode ser futura</span>';
+                    document.getElementById('data_intubacao').value = '';
+                } else {
+                    divTempo.innerHTML = `<strong>Tempo de Intubação:</strong> ${dias} dia(s)`;
+                }
+            } else {
+                divTempo.innerHTML = '';
+            }
+        }
+
+        function salvarFormulario(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const dados = Object.fromEntries(formData.entries());
+            
+            // Calcular e adicionar tempo de intubação
+            if (dados.data_intubacao) {
+                const dataInicio = new Date(dados.data_intubacao);
+                const dataAtual = new Date();
+                dataInicio.setHours(12, 0, 0, 0);
+                dataAtual.setHours(12, 0, 0, 0);
+                const diffTempo = dataAtual - dataInicio;
+                dados.tempo_intubacao = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+            }
+            
+            dados.timestamp = new Date().toISOString();
+            dados.tromboprofilaxia = formData.getAll('tromboprofilaxia').join(';');
+            dados.ulcera = formData.getAll('ulcera').join(';');
+
+            avaliacoes.push(dados);
+            localStorage.setItem('avaliacoesFastHug', JSON.stringify(avaliacoes));
+            atualizarTabela();
+            mostrarMensagem('Avaliação salva com sucesso!', 'sucesso');
+            event.target.reset();
+        }
+
+        function mostrarMensagem(texto, tipo) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${tipo}">${texto}</div>`;
+            setTimeout(() => status.innerHTML = '', 3000);
+        }
+
+        function baixarCSV() {
+            const cabecalhos = [
+                'Data da Avaliação',
+                'Paciente',
+                'Leito',
+                'Data da Intubação',
+                'Tempo de Intubação (dias)',
+                'Alimentação',
+                'Dor',
+                'RASS',
+                'Tromboprofilaxia',
+                'Cabeceira',
+                'Profilaxia Úlcera',
+                'Glicemia',
+                'Evacuação',
+                'Diurese',
+                'Volume Diurese (mL)',
+                'Observações',
+                'Data/Hora Registro'
+            ];
+
+            let csvContent = cabecalhos.join(',') + '\n';
+
+            avaliacoes.forEach(av => {
+                const linha = [
+                    av.data,
+                    `"${av.paciente}"`,
+                    `"${av.leito}"`,
+                    av.data_intubacao || 'N/A',
+                    av.tempo_intubacao || 'N/A',
+                    `"${av.alimentacao}"`,
+                    av.dor,
+                    `"${av.rass}"`,
+                    `"${av.tromboprofilaxia}"`,
+                    av.cabeceira,
+                    `"${av.ulcera}"`,
+                    av.glicemia,
+                    av.evacuacao,
+                    av.diurese_presente,
+                    av.volume_diurese || 'N/A',
+                    `"${av.observacoes || ''}"`,
+                    `"${av.timestamp}"`
+                ];
+                csvContent += linha.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const dataAtual = new Date().toISOString().split('T')[0];
+            const nomeArquivo = `fasthug_registros_${dataAtual}.csv`;
+
+            if (navigator.msSaveBlob) {
+                navigator.msSaveBlob(blob, nomeArquivo);
+            } else {
+                link.href = URL.createObjectURL(blob);
+                link.setAttribute("download", nomeArquivo);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function atualizarTabela() {
+            const tbody = document.querySelector('#avaliacoesTable tbody');
+            tbody.innerHTML = avaliacoes.map((av, index) => `
+                <tr>
+                    <td>${new Date(av.data).toLocaleDateString()}</td>
+                    <td>${av.paciente}</td>
+                    <td>${av.leito}</td>
+                    <td>
+                        <button onclick="verDetalhes(${index})" class="botao">Ver</button>
+                        <button onclick="excluirAvaliacao(${index})" class="botao">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function verDetalhes(index) {
+            const av = avaliacoes[index];
+            alert(`
+                Detalhes da Avaliação:
+                
+                Paciente: ${av.paciente}
+                Data: ${av.data}
+                Leito: ${av.leito}
+                Data da Intubação: ${av.data_intubacao || 'Não informada'}
+                Tempo de Intubação: ${av.tempo_intubacao ? av.tempo_intubacao + ' dias' : 'N/A'}
+                Alimentação: ${av.alimentacao}
+                Dor: ${av.dor}
+                RASS: ${av.rass}
+                Tromboprofilaxia: ${av.tromboprofilaxia}
+                Cabeceira: ${av.cabeceira}º
+                Profilaxia Úlcera: ${av.ulcera}
+                Glicemia: ${av.glicemia}
+                Evacuação: ${av.evacuacao}
+                Diurese: ${av.diurese_presente}
+                Volume Diurese: ${av.volume_diurese ? av.volume_diurese + ' mL' : 'N/A'}
+                Observações: ${av.observacoes || 'Nenhuma'}
+            `);
+        }
+
+        function excluirAvaliacao(index) {
+            if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
+                avaliacoes.splice(index, 1);
+                localStorage.setItem('avaliacoesFastHug', JSON.stringify(avaliacoes));
+                atualizarTabela();
+                mostrarMensagem('Avaliação excluída com sucesso!', 'sucesso');
+            }
+        }
+
+        function limparDados() {
+            if (confirm('Tem certeza que deseja limpar todos os registros?')) {
+                avaliacoes = [];
+                localStorage.removeItem('avaliacoesFastHug');
+                atualizarTabela();
+                mostrarMensagem('Todos os registros foram removidos.', 'sucesso');
+            }
+        }
+    </script>
